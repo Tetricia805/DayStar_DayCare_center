@@ -1,0 +1,93 @@
+Project structure
+
+daystar-daycare/
+├── client/                     # Frontend (React.js)
+│   ├── public/                 # Static assets
+│   │   ├── index.html          # Main HTML file
+│   │   ├── favicon.ico         # Favicon
+│   │   └── manifest.json       # Web app manifest
+│   ├── src/                    # Source code
+│   │   ├── assets/             # Images, fonts, etc.
+│   │   ├── components/         # Reusable UI components
+│   │   │   ├── Auth/           # Authentication components
+│   │   │   │   ├── Login.js
+│   │   │   │   └── Register.js
+│   │   │   ├── Babysitter/     # Babysitter-related components
+│   │   │   │   ├── BabysitterForm.js
+│   │   │   │   ├── PaymentSummary.js
+│   │   │   │   └── Schedule.js
+│   │   │   ├── Child/          # Child-related components
+│   │   │   │   ├── ChildForm.js
+│   │   │   │   ├── Attendance.js
+│   │   │   │   └── IncidentReport.js
+│   │   │   ├── Finance/        # Financial management components
+│   │   │   │   ├── IncomeTracker.js
+│   │   │   │   ├── ExpenseTracker.js
+│   │   │   │   └── BudgetDashboard.js
+│   │   │   └── Notification/   # Notification components
+│   │   │       └── AlertBox.js
+│   │   ├── pages/              # Page-level components
+│   │   │   ├── Dashboard.js    # Manager dashboard
+│   │   │   ├── BabysitterPage.js
+│   │   │   ├── ChildPage.js
+│   │   │   ├── FinancePage.js
+│   │   │   └── ReportsPage.js
+│   │   ├── redux/              # State management (optional)
+│   │   │   ├── actions/
+│   │   │   ├── reducers/
+│   │   │   └── store.js
+│   │   ├── services/           # API calls
+│   │   │   ├── api.js          # Axios or fetch configuration
+│   │   │   ├── babysitterService.js
+│   │   │   ├── childService.js
+│   │   │   ├── financeService.js
+│   │   │   └── notificationService.js
+│   │   ├── App.js              # Main app component
+│   │   ├── index.js            # Entry point
+│   │   └── styles/             # CSS or styled-components
+│   │       └── global.css
+│   ├── package.json            # Frontend dependencies
+│   └── .gitignore              # Git ignore file
+│
+├── server/                     # Backend (Node.js, Express.js)
+│   ├── config/                 # Configuration files
+│   │   └── db.js               # MySQL connection setup
+│   ├── controllers/            # Business logic
+│   │   ├── babysitterController.js
+│   │   ├── childController.js
+│   │   ├── financeController.js
+│   │   └── notificationController.js
+│   ├── models/                 # Database schemas (MySQL)
+│   │   ├── Babysitter.js       # Babysitter schema
+│   │   ├── Child.js            # Child schema
+│   │   ├── Payment.js          # Payment schema
+│   │   ├── Attendance.js       # Attendance schema
+│   │   ├── Incident.js         # Incident schema
+│   │   ├── Income.js           # Income schema
+│   │   ├── Expense.js          # Expense schema
+│   │   └── Budget.js           # Budget schema
+│   ├── routes/                 # API endpoints
+│   │   ├── babysitterRoutes.js
+│   │   ├── childRoutes.js
+│   │   ├── financeRoutes.js
+│   │   └── notificationRoutes.js
+│   ├── middleware/             # Custom middleware
+│   │   ├── auth.js             # Authentication middleware
+│   │   └── validate.js         # Input validation
+│   ├── utils/                  # Utility functions
+│   │   ├── notifications.js    # Notification logic
+│   │   └── reports.js          # Report generation logic
+│   ├── server.js               # Main server file
+│   ├── package.json            # Backend dependencies
+│   └── .gitignore              # Git ignore file
+│
+├── docs/                       # Project documentation
+│   ├── design.md               # System architecture and design decisions
+│   ├── milestones.md           # Milestone breakdowns
+│   └── report.pdf              # Final IEEE-style report
+│
+├── .github/                    # GitHub workflows
+│   └── workflows/
+│       └── ci.yml              # Continuous integration setup
+│
+└── README.md                   # Project overview and setup instructions
