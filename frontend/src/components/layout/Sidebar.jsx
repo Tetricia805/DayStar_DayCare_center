@@ -1,211 +1,207 @@
+import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { useContext } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useAuth } from '../../context/AuthContext';
 import { 
   MdDashboard, 
+  MdPeople, 
   MdChildCare, 
-  MdBabyChangingStation, 
+  MdPayment, 
+  MdSchedule,
+  MdWarning,
+  MdPersonAdd,
   MdAttachMoney, 
-  MdNotifications, 
+  MdAssessment,
+  MdReceipt,
+  MdAccountBalance,
   MdLogout 
 } from 'react-icons/md';
-import { FaCalendarAlt } from 'react-icons/fa';
-import { AuthContext } from '../../context/AuthContext';
 
-const SidebarContainer = styled.aside`
-  background-color: #fff;
-  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-  width: ${props => props.isOpen ? '250px' : '80px'};
-  position: fixed;
+const SidebarContainer = styled.div`
+  width: ${props => props.isOpen ? '250px' : '70px'};
   height: 100vh;
-  transition: all 0.3s ease;
+  background: var(--sidebar-bg);
+  position: fixed;
+  left: 0;
+  top: 0;
+  transition: width 0.3s ease;
   z-index: 1000;
-  overflow-x: hidden;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 `;
 
 const Logo = styled.div`
-  padding: 20px;
-  text-align: center;
-  margin-bottom: 20px;
+  height: 60px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  
-  img {
-    height: ${props => props.isOpen ? '40px' : '30px'};
-    transition: all 0.3s ease;
-  }
-  
-  h1 {
-    margin-left: 10px;
-    color: var(--primary-color);
-    font-size: 1.5rem;
-    display: ${props => props.isOpen ? 'block' : 'none'};
-  }
+  padding: 0 1rem;
+  color: var(--primary);
+  font-size: 1.5rem;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+`;
+
+const Nav = styled.nav`
+  padding: 1rem 0;
 `;
 
 const NavItem = styled(NavLink)`
   display: flex;
   align-items: center;
-  padding: 15px 20px;
-  color: var(--text-color);
+  padding: 0.75rem 1rem;
+  color: var(--text-secondary);
+  text-decoration: none;
   transition: all 0.3s ease;
-  margin-bottom: 5px;
-  
-  &:hover, &.active {
-    background-color: var(--primary-light);
-    color: var(--primary-color);
-    border-left: 4px solid var(--primary-color);
+  white-space: nowrap;
+  overflow: hidden;
+
+  &:hover {
+    background: var(--hover-bg);
+    color: var(--primary);
+  }
+
+  &.active {
+    background: var(--primary);
+    color: white;
   }
   
   svg {
-    font-size: 1.5rem;
-    margin-right: ${props => props.isOpen ? '10px' : '0'};
-  }
-  
-  span {
-    display: ${props => props.isOpen ? 'block' : 'none'};
-    white-space: nowrap;
+    min-width: 24px;
+    margin-right: 1rem;
   }
 `;
 
-const NavSection = styled.div`
-  margin-bottom: 20px;
-  
-  h3 {
-    padding: 0 20px;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    color: var(--dark-gray);
-    margin-bottom: 10px;
-    display: ${props => props.isOpen ? 'block' : 'none'};
-  }
+const NavText = styled.span`
+  opacity: ${props => props.isOpen ? 1 : 0};
+  transition: opacity 0.3s ease;
 `;
 
 const LogoutButton = styled.button`
   display: flex;
   align-items: center;
-  padding: 15px 20px;
-  color: var(--text-color);
-  background: none;
+  gap: 0.5rem;
+  background: #3b82f6;
+  color: white;
   border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
   cursor: pointer;
+  margin-top: 2rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
   width: 100%;
-  text-align: left;
-  transition: all 0.3s ease;
-  margin-top: auto;
+  justify-content: center;
   
   &:hover {
-    background-color: #ffebee;
-    color: var(--danger-color);
-  }
-  
-  svg {
-    font-size: 1.5rem;
-    margin-right: ${props => props.isOpen ? '10px' : '0'};
-  }
-  
-  span {
-    display: ${props => props.isOpen ? 'block' : 'none'};
+    background: #60a5fa;
   }
 `;
 
-const Sidebar = ({ isOpen }) => {
-  const { logout, user } = useContext(AuthContext) || { logout: () => console.log('Logout clicked'), user: { role: 'manager' } };
+const Sidebar = ({ isOpen, toggleSidebar }) => {
+  const location = useLocation();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
   
   return (
     <SidebarContainer isOpen={isOpen}>
-      <Logo isOpen={isOpen}>
-        <img src="/logo-placeholder.png" alt="Daystar Daycare" />
-        {isOpen && <h1>Daystar</h1>}
+      <Logo>
+        <NavText isOpen={isOpen}>DayStar</NavText>
       </Logo>
-      
-      <nav>
-        <NavSection isOpen={isOpen}>
-          {isOpen && <h3>Main</h3>}
-          <NavItem to="/dashboard" isOpen={isOpen}>
+      <Nav>
+        {user?.role === 'manager' && (
+          <>
+            <NavItem to="/dashboard" active={location.pathname === '/dashboard'}>
             <MdDashboard />
-            <span>Dashboard</span>
+              <NavText isOpen={isOpen}>Dashboard</NavText>
+            </NavItem>
+            <NavItem to="/babysitters" active={location.pathname === '/babysitters'}>
+              <MdPeople />
+              <NavText isOpen={isOpen}>Babysitters</NavText>
+            </NavItem>
+            <NavItem to="/babysitters/register">
+              <MdPersonAdd />
+              <NavText isOpen={isOpen}>Register Babysitter</NavText>
+            </NavItem>
+            <NavItem to="/children" active={location.pathname === '/children'}>
+              <MdChildCare />
+              <NavText isOpen={isOpen}>Children</NavText>
+            </NavItem>
+            <NavItem to="/children/register">
+              <MdPersonAdd />
+              <NavText isOpen={isOpen}>Register Child</NavText>
           </NavItem>
-        </NavSection>
+            <NavItem to="/children/attendance" active={location.pathname === '/children/attendance'}>
+              <MdSchedule />
+              <NavText isOpen={isOpen}>Attendance</NavText>
+          </NavItem>
+            <NavItem to="/incidents" active={location.pathname === '/incidents'}>
+              <MdWarning />
+              <NavText isOpen={isOpen}>Incidents</NavText>
+          </NavItem>
+            <NavItem to="/finance" active={location.pathname === '/finance'}>
+            <MdAttachMoney />
+              <NavText isOpen={isOpen}>Finance</NavText>
+          </NavItem>
+            <NavItem to="/finance/income">
+              <MdReceipt />
+              <NavText isOpen={isOpen}>Income</NavText>
+          </NavItem>
+            <NavItem to="/finance/expenses">
+              <MdAccountBalance />
+              <NavText isOpen={isOpen}>Expenses</NavText>
+          </NavItem>
+            <NavItem to="/finance/budget">
+              <MdAssessment />
+              <NavText isOpen={isOpen}>Budget</NavText>
+          </NavItem>
+            <NavItem to="/finance/reports">
+              <MdAssessment />
+              <NavText isOpen={isOpen}>Reports</NavText>
+          </NavItem>
+            <NavItem to="/settings" active={location.pathname === '/settings'}>
+              <MdAssessment />
+              <NavText isOpen={isOpen}>Settings</NavText>
+          </NavItem>
+          </>
+        )}
         
-        <NavSection isOpen={isOpen}>
-          {isOpen && <h3>Babysitter Management</h3>}
-          <NavItem to="/dashboard/babysitters" isOpen={isOpen}>
-            <MdBabyChangingStation />
-            <span>Babysitters</span>
+        {user?.role === 'babysitter' && (
+          <>
+            <NavItem to="/babysitter-dashboard" active={location.pathname === '/babysitter-dashboard'}>
+              <MdDashboard />
+              <NavText isOpen={isOpen}>Dashboard</NavText>
           </NavItem>
-          <NavItem to="/dashboard/babysitters/register" isOpen={isOpen}>
-            <MdBabyChangingStation />
-            <span>Register Babysitter</span>
+            <NavItem to="/babysitter/children" active={location.pathname === '/babysitter/children'}>
+              <MdChildCare />
+              <NavText isOpen={isOpen}>My Children</NavText>
           </NavItem>
-          <NavItem to="/dashboard/babysitters/payments" isOpen={isOpen}>
-            <MdAttachMoney />
-            <span>Babysitter Payments</span>
+            <NavItem to="/babysitter/schedule" active={location.pathname === '/babysitter/schedule'}>
+              <MdSchedule />
+              <NavText isOpen={isOpen}>My Schedule</NavText>
           </NavItem>
-          <NavItem to="/dashboard/babysitters/schedule" isOpen={isOpen}>
-            <FaCalendarAlt />
-            <span>Scheduling</span>
+            <NavItem to="/babysitter/payments" active={location.pathname === '/babysitter/payments'}>
+              <MdPayment />
+              <NavText isOpen={isOpen}>My Payments</NavText>
           </NavItem>
-        </NavSection>
-        
-        <NavSection isOpen={isOpen}>
-          {isOpen && <h3>Child Management</h3>}
-          <NavItem to="/dashboard/children" isOpen={isOpen}>
-            <MdChildCare />
-            <span>Children</span>
+            <NavItem to="/babysitter/incidents" active={location.pathname === '/babysitter/incidents'}>
+              <MdWarning />
+              <NavText isOpen={isOpen}>Incident Reports</NavText>
           </NavItem>
-          <NavItem to="/dashboard/children/register" isOpen={isOpen}>
-            <MdChildCare />
-            <span>Register Child</span>
-          </NavItem>
-          <NavItem to="/dashboard/children/attendance" isOpen={isOpen}>
-            <FaCalendarAlt />
-            <span>Attendance</span>
-          </NavItem>
-          <NavItem to="/dashboard/incidents" isOpen={isOpen}>
-            <MdNotifications />
-            <span>Incident Reports</span>
-          </NavItem>
-        </NavSection>
-        
-        <NavSection isOpen={isOpen}>
-          {isOpen && <h3>Financial Management</h3>}
-          <NavItem to="/dashboard/finance" isOpen={isOpen}>
-            <MdAttachMoney />
-            <span>Financial Dashboard</span>
-          </NavItem>
-          <NavItem to="/dashboard/finance/income" isOpen={isOpen}>
-            <MdAttachMoney />
-            <span>Income Tracking</span>
-          </NavItem>
-          <NavItem to="/dashboard/finance/expenses" isOpen={isOpen}>
-            <MdAttachMoney />
-            <span>Expense Tracking</span>
-          </NavItem>
-          <NavItem to="/dashboard/finance/budget" isOpen={isOpen}>
-            <MdAttachMoney />
-            <span>Budget Planning</span>
-          </NavItem>
-          <NavItem to="/dashboard/finance/reports" isOpen={isOpen}>
-            <MdAttachMoney />
-            <span>Financial Reports</span>
-          </NavItem>
-        </NavSection>
-        
-        <NavSection isOpen={isOpen}>
-          {isOpen && <h3>Notifications</h3>}
-          <NavItem to="/dashboard/notifications" isOpen={isOpen}>
-            <MdNotifications />
-            <span>Notification Center</span>
-          </NavItem>
-        </NavSection>
-      </nav>
+          </>
+        )}
+      </Nav>
       
-      <LogoutButton onClick={logout} isOpen={isOpen}>
-        <MdLogout />
-        <span>Logout</span>
+      {isOpen && (
+        <LogoutButton onClick={handleLogout}>
+          <MdLogout /> Logout
       </LogoutButton>
+      )}
     </SidebarContainer>
   );
 };

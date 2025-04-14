@@ -9,11 +9,35 @@ const IncidentReporting = () => {
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
-      // TODO: Implement API call to submit incident report
-      console.log('Incident data:', data);
+      const response = await fetch('http://localhost:5000/api/incidents', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          child_id: data.childId,
+          incident_date: data.date,
+          incident_time: data.time,
+          incident_type: data.type,
+          description: data.description,
+          location: data.location,
+          severity: data.severity,
+          action_taken: data.actionTaken,
+          reported_by: data.reportedBy
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit incident report');
+      }
+
+      const result = await response.json();
+      console.log('Incident report submitted successfully:', result);
       reset();
+      // Show success message or redirect
     } catch (error) {
       console.error('Error submitting incident:', error);
+      // Show error message to user
     } finally {
       setIsSubmitting(false);
     }

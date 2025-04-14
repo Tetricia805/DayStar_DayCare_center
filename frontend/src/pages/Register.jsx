@@ -1,10 +1,9 @@
-
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import styled from 'styled-components';
-import { AuthContext } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 const RegisterContainer = styled.div`
   display: flex;
@@ -106,7 +105,7 @@ const LoginLink = styled.div`
 const Register = () => {
   const { register: registerForm, handleSubmit, formState: { errors } } = useForm();
   const [loading, setLoading] = useState(false);
-  const { register } = useContext(AuthContext);
+  const { register } = useAuth();
   const navigate = useNavigate();
   
   const onSubmit = async (data) => {
@@ -203,12 +202,12 @@ const Register = () => {
           </FormGroup>
           
           <Button type="submit" disabled={loading}>
-            {loading ? 'Creating Account...' : 'Register'}
+            {loading ? 'Creating account...' : 'Create Account'}
           </Button>
         </form>
         
         <LoginLink>
-          Already have an account? <Link to="/login">Sign in</Link>
+          Already have an account? <Link to="/login">Login here</Link>
         </LoginLink>
       </RegisterCard>
     </RegisterContainer>
