@@ -1,135 +1,184 @@
-import { useState, useContext } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 
 const LoginContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background: #f5f6fa;
 `;
 
 const LoginCard = styled.div`
   background: white;
   padding: 2rem;
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
-`;
-
-const Title = styled.h1`
-  text-align: center;
-  color: var(--text-color);
-  margin-bottom: 2rem;
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
+`;
+
+const FormGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const Label = styled.label`
+  font-weight: 500;
+  color: #333;
 `;
 
 const Input = styled.input`
   padding: 0.75rem;
-  border: 1px solid var(--light-gray);
-  border-radius: var(--border-radius);
+  border: 1px solid #ddd;
+  border-radius: 4px;
   font-size: 1rem;
 
   &:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: #4a90e2;
   }
 `;
 
 const Button = styled.button`
-  padding: 0.75rem;
-  background-color: var(--primary-color);
+  background: #4a90e2;
   color: white;
   border: none;
-  border-radius: var(--border-radius);
+  padding: 0.75rem;
+  border-radius: 4px;
   font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background 0.3s;
 
   &:hover {
-    background-color: var(--primary-dark);
+    background: #357abd;
+  }
+
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
   }
 `;
 
-const RegisterLink = styled.div`
+const Logo = styled.div`
   text-align: center;
-  margin-top: 1rem;
+  margin-bottom: 2rem;
   
-  a {
-    color: var(--primary-color);
-    text-decoration: none;
-    
-    &:hover {
-      text-decoration: underline;
-    }
+  h1 {
+    color: #4a90e2;
+    margin: 0;
+  }
+  
+  p {
+    color: #666;
+    margin: 0.5rem 0 0;
   }
 `;
 
-const ErrorMessage = styled.div`
-  color: var(--danger-color);
-  text-align: center;
-  margin-bottom: 1rem;
+const Credentials = styled.div`
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #666;
+
+  h3 {
+    color: #4a90e2;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    margin: 0.25rem 0;
+  }
 `;
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const { login } = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setIsLoading(true);
 
     try {
-      const result = await login(email, password);
+      const result = login(email, password);
+      
       if (result.success) {
-        // Redirect to the intended page or dashboard
-        const from = location.state?.from?.pathname || '/dashboard';
-        navigate(from, { replace: true });
+        toast.success('Login successful!');
+        // Navigate based on user role
+        if (result.user.role === 'manager') {
+          navigate('/dashboard');
+        } else if (result.user.role === 'babysitter') {
+          navigate('/babysitter-dashboard');
+        }
       } else {
-        setError(result.message || 'Login failed. Please try again.');
+        toast.error(result.message);
       }
-    } catch (err) {
-      setError('An error occurred. Please try again.');
+    } catch (error) {
+      toast.error('An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <LoginContainer>
       <LoginCard>
-        <Title>Login</Title>
-        {error && <ErrorMessage>{error}</ErrorMessage>}
+        <Logo>
+          <h1>Daystar Daycare</h1>
+          <p>Welcome back! Please login to continue.</p>
+        </Logo>
+        
         <Form onSubmit={handleSubmit}>
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <Button type="submit">Login</Button>
+          <FormGroup>
+            <Label htmlFor="email">Email</Label>
+            <Input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="Enter your email"
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="password">Password</Label>
+            <Input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Enter your password"
+            />
+          </FormGroup>
+
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? 'Logging in...' : 'Login'}
+          </Button>
         </Form>
-        <RegisterLink>
-          Don't have an account? <Link to="/register">Register</Link>
-        </RegisterLink>
+
+        <Credentials>
+          <h3>Demo Credentials</h3>
+          <p><strong>Manager:</strong> admin@daystar.com / admin123</p>
+          <p><strong>Babysitter 1:</strong> jane@daystar.com / jane123</p>
+          <p><strong>Babysitter 2:</strong> john@daystar.com / john123</p>
+        </Credentials>
       </LoginCard>
     </LoginContainer>
   );

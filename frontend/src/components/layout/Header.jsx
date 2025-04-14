@@ -1,8 +1,7 @@
-
-import { useContext } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { MdMenu, MdNotifications, MdSettings } from 'react-icons/md';
-import { AuthContext } from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
+import { MdNotifications, MdPerson } from 'react-icons/md';
 
 const HeaderContainer = styled.header`
   display: flex;
@@ -10,130 +9,97 @@ const HeaderContainer = styled.header`
   align-items: center;
   padding: 1rem 2rem;
   background-color: white;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 70px;
 `;
 
-const ToggleButton = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-color);
+const Title = styled.h1`
   font-size: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  &:hover {
-    color: var(--primary-color);
-  }
-`;
-
-const PageTitle = styled.h1`
-  font-size: 1.5rem;
-  color: var(--primary-color);
+  color: #333;
   margin: 0;
 `;
 
 const RightSection = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
 `;
 
 const IconButton = styled.button`
   background: none;
   border: none;
-  cursor: pointer;
-  color: var(--text-color);
   font-size: 1.5rem;
+  color: #666;
+  cursor: pointer;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   
   &:hover {
-    color: var(--primary-color);
-  }
-  
-  .notification-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: var(--danger-color);
-    color: white;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    font-size: 0.7rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    color: #3b82f6;
   }
 `;
 
-const UserInfo = styled.div`
+const NotificationBadge = styled.span`
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const UserProfile = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  
-  .avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: var(--primary-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--primary-color);
-    font-weight: bold;
-  }
-  
-  .user-details {
-    display: flex;
-    flex-direction: column;
-    
-    .name {
-      font-weight: 600;
-    }
-    
-    .role {
-      font-size: 0.8rem;
-      color: var(--dark-gray);
-    }
-  }
+  cursor: pointer;
+  position: relative;
 `;
 
-const Header = ({ toggleSidebar }) => {
-  const { user } = useContext(AuthContext) || { 
-    user: { name: 'Admin User', role: 'Manager', initials: 'AU' } 
+const UserName = styled.span`
+  font-weight: 500;
+  color: #333;
+`;
+
+const Header = () => {
+  const { user } = useAuth();
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
+    setShowProfile(false);
   };
-  
+
+  const toggleProfile = () => {
+    setShowProfile(!showProfile);
+    setShowNotifications(false);
+  };
+
   return (
     <HeaderContainer>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <ToggleButton onClick={toggleSidebar}>
-          <MdMenu />
-        </ToggleButton>
-        <PageTitle>Daystar Daycare Management</PageTitle>
-      </div>
+      <Title>DayStar Daycare</Title>
       
       <RightSection>
-        <IconButton>
+        <IconButton onClick={toggleNotifications}>
           <MdNotifications />
-          <span className="notification-badge">3</span>
+          <NotificationBadge>3</NotificationBadge>
         </IconButton>
-        <IconButton>
-          <MdSettings />
-        </IconButton>
-        <UserInfo>
-          <div className="avatar">
-            {user.initials || user.name.charAt(0)}
-          </div>
-          <div className="user-details">
-            <span className="name">{user.name}</span>
-            <span className="role">{user.role}</span>
-          </div>
-        </UserInfo>
+        
+        <UserProfile onClick={toggleProfile}>
+          <IconButton>
+            <MdPerson />
+          </IconButton>
+          <UserName>{user?.name || 'User'}</UserName>
+        </UserProfile>
       </RightSection>
     </HeaderContainer>
   );

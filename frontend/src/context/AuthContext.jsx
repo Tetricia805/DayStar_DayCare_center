@@ -1,73 +1,104 @@
-
-import { createContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+// Predefined users
+const PREDEFINED_USERS = {
+  manager: {
+    id: 1,
+    name: 'Admin Manager',
+    email: 'admin@daystar.com',
+    password: 'admin123',
+    role: 'manager'
+  },
+  babysitter1: {
+    id: 2,
+    name: 'Jane Smith',
+    email: 'jane@daystar.com',
+    password: 'jane123',
+    role: 'babysitter'
+  },
+  babysitter2: {
+    id: 3,
+    name: 'John Doe',
+    email: 'john@daystar.com',
+    password: 'john123',
+    role: 'babysitter'
+  }
+};
 
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  // Check for saved user data on mount
   useEffect(() => {
-    // Check if user is logged in (could use local storage or cookies)
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
     }
-    setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
-    try {
-      // This would be replaced with actual API call in production
-      // Mock login for now
-      const mockUser = {
-        id: '1',
-        name: 'Admin User',
-        email: email,
-        role: 'manager',
-        token: 'mock-token-123456',
-        initials: 'AU'
+  const login = (email, password) => {
+    // Find user with matching credentials
+    const foundUser = Object.values(PREDEFINED_USERS).find(
+      u => u.email === email && u.password === password
+    );
+
+    if (foundUser) {
+      // Remove password before storing user data
+      const { password: _, ...userWithoutPassword } = foundUser;
+      setUser(userWithoutPassword);
+      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+      return { 
+        success: true,
+        user: userWithoutPassword
       };
-      
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      return { success: true };
-    } catch (error) {
-      return { success: false, message: error.message };
     }
+
+    return { 
+      success: false, 
+      message: 'Invalid email or password' 
+    };
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
-    navigate('/login');
   };
 
-  const register = async (userData) => {
-    try {
-      // Mock registration
-      // This would be replaced with actual API call in production
-      return { success: true };
-    } catch (error) {
-      return { success: false, message: error.message };
-    }
+  const isManager = () => {
+    return user?.role === 'manager';
   };
 
-  const value = {
-    user,
-    loading,
-    login,
-    logout,
-    register
+  const isBabysitter = () => {
+    return user?.role === 'babysitter';
+  };
+
+  const isParent = () => {
+    return user?.role === 'parent';
   };
 
   return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
+    <AuthContext.Provider value={{ 
+      user,
+      login, 
+      logout, 
+      isManager, 
+      isBabysitter, 
+      isParent 
+    }}>
+      {children}
     </AuthContext.Provider>
   );
 };
 
-export default AuthContext;
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

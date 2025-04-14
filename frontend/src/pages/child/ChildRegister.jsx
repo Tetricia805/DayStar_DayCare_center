@@ -1,8 +1,8 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import styled from 'styled-components';
+import axios from 'axios';
 
 const Container = styled.div`
   background-color: white;
@@ -134,17 +134,39 @@ const ChildRegister = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      // This would be an API call in production
-      console.log('Form data submitted:', data);
-      
-      // Mock successful registration
-      setTimeout(() => {
-        toast.success('Child registered successfully!');
-        reset();
-        setLoading(false);
-      }, 1000);
+      // Format the data to match the backend API expectations
+      const formattedData = {
+        full_name: data.fullName,
+        age: parseInt(data.age),
+        session_type: data.sessionType === 'halfDay' ? 'half-day' : 'full-day',
+        parent_name: data.parentName,
+        parent_phone: data.parentPhone,
+        alternate_contact_name: data.alternateContact,
+        alternate_contact_phone: data.alternatePhone,
+        relationship_to_child: data.relationship,
+        allergies: data.allergies || null,
+        medical_conditions: data.medicalConditions || null,
+        dietary_restrictions: data.dietaryRestrictions || null,
+        additional_notes: data.additionalNotes || null
+      };
+
+      console.log('Sending data to backend:', formattedData);
+
+      // Make API call to backend
+      const response = await axios.post('http://localhost:5000/api/children', formattedData);
+      console.log('Response from backend:', response.data);
+
+      toast.success('Child registered successfully!');
+      reset(); // Reset form
     } catch (error) {
-      toast.error('Failed to register child. Please try again.');
+      console.error('Registration error details:', {
+        message: error.message,
+        response: error.response?.data,
+        data: error.response?.data?.message,
+        status: error.response?.status
+      });
+      toast.error(error.response?.data?.message || 'Failed to register child. Please try again.');
+    } finally {
       setLoading(false);
     }
   };
@@ -242,15 +264,31 @@ const ChildRegister = () => {
           </FormGroup>
           
           <FormGroup>
-            <label htmlFor="alternateContact">Alternate Contact Person & Number</label>
+            <label htmlFor="alternateContact">Alternate Contact Name</label>
             <input
               id="alternateContact"
               type="text"
               {...register('alternateContact', { 
-                required: 'Alternate contact is required'
+                required: 'Alternate contact name is required'
               })}
             />
             {errors.alternateContact && <p className="error-message">{errors.alternateContact.message}</p>}
+          </FormGroup>
+          
+          <FormGroup>
+            <label htmlFor="alternatePhone">Alternate Contact Phone</label>
+            <input
+              id="alternatePhone"
+              type="tel"
+              {...register('alternatePhone', { 
+                required: 'Alternate contact phone is required',
+                pattern: {
+                  value: /^[0-9]{10}$/,
+                  message: 'Phone number must be 10 digits'
+                }
+              })}
+            />
+            {errors.alternatePhone && <p className="error-message">{errors.alternatePhone.message}</p>}
           </FormGroup>
           
           <FormGroup>

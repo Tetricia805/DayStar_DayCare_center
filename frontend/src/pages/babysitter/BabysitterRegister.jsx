@@ -1,8 +1,8 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import styled from 'styled-components';
+import axios from 'axios';
 
 const Container = styled.div`
   background-color: white;
@@ -112,17 +112,25 @@ const BabysitterRegister = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      // This would be an API call in production
-      console.log('Form data submitted:', data);
-      
-      // Mock successful registration
-      setTimeout(() => {
-        toast.success('Babysitter registered successfully!');
-        reset();
-        setLoading(false);
-      }, 1000);
+      // Make API call to backend
+      const response = await axios.post('http://localhost:5000/api/babysitters', {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email || null, // Handle optional email
+        phoneNumber: data.phone,
+        nin: data.nin,
+        dateOfBirth: data.dob,
+        nextOfKinName: data.kinName,
+        nextOfKinPhone: data.kinPhone,
+        nextOfKinRelationship: data.kinRelationship
+      });
+
+      toast.success('Babysitter registered successfully!');
+      reset(); // Reset form
     } catch (error) {
-      toast.error('Failed to register babysitter. Please try again.');
+      console.error('Registration error:', error);
+      toast.error(error.response?.data?.message || 'Failed to register babysitter. Please try again.');
+    } finally {
       setLoading(false);
     }
   };
