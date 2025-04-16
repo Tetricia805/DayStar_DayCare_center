@@ -14,7 +14,7 @@ router.get('/child/:childId', checkRole(['manager', 'babysitter', 'parent']), in
 router.put('/:id', checkRole(['manager']), incidentController.updateIncident);
 router.get('/report', checkRole(['manager']), incidentController.getIncidentReport);
 
-// Create a new incident report
+// creating a new incident reporrt
 router.post('/', createIncident);
 
 module.exports = router; 
